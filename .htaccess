@@ -1,7 +1,8 @@
 RewriteEngine On
 
-# Clean API URL: /api/{domain}/{seq}
+# Clean API URL: /api/{domain}/{seq} or /api/{domain}
 RewriteRule ^api/([^/]+)/([0-9]+)$ api.php?domain=$1&seq=$2 [L,QSA]
+RewriteRule ^api/([^/]+)/?$ api.php?domain=$1 [L,QSA]
 
 # Deny access to config
 <Files "config.php">
