@@ -40,12 +40,18 @@ try {
         exit;
     }
 
+    // Build base URL for uploaded files
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $baseUrl = defined('BASE_URL') && BASE_URL !== '' ? rtrim(BASE_URL, '/') : $scheme . '://' . $host;
+
     // Image priority: image_url > image_file
     $image = '';
     if (!empty($ad['image_url'])) {
         $image = $ad['image_url'];
     } elseif (!empty($ad['image_file'])) {
-        $image = $ad['image_file'];
+        // Prepend base URL to make it a full path
+        $image = $baseUrl . '/' . ltrim($ad['image_file'], '/');
     }
 
     echo json_encode([
