@@ -20,13 +20,21 @@ $db = getDB();
 
 try {
     $db->beginTransaction();
+
+    // Pass 1: set all to temporary high values to avoid UNIQUE constraint conflicts
     $stmt = $db->prepare("UPDATE ads SET sort_order = ? WHERE id = ? AND domain_id = ?");
+    foreach ($ids as $i => $id) {
+        $stmt->execute([10000 + $i, intval($id), $domainId]);
+    }
+
+    // Pass 2: set final sort_order 1-N
     foreach ($ids as $i => $id) {
         $stmt->execute([$i + 1, intval($id), $domainId]);
     }
+
     $db->commit();
-    echo json_encode(['code' => 0]);
+    echo json_encode(['code' => 0, 'msg' => 'ok']);
 } catch (Exception $e) {
     $db->rollBack();
-    echo json_encode(['code' => 1, 'msg' => 'Sort failed']);
+    echo json_encode(['code' => 1, 'msg' => $e->getMessage()]);
 }

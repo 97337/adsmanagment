@@ -144,6 +144,15 @@ $ads = $stmt->fetchAll();
     </div>
 
     <script>
+        function showToast(msg, isError) {
+            const t = document.createElement('div');
+            t.className = 'alert ' + (isError ? 'alert-error' : 'alert-success');
+            t.textContent = msg;
+            Object.assign(t.style, { position: 'fixed', top: '20px', right: '20px', zIndex: '9999', minWidth: '200px' });
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 2000);
+        }
+
         // Drag to reorder
         const tbody = document.getElementById('adList');
         if (tbody && tbody.children.length > 0 && tbody.children[0].dataset.id) {
@@ -159,11 +168,18 @@ $ads = $stmt->fetchAll();
                         body: JSON.stringify({ domain_id: <?= $domainId ?>, ids: ids })
                     }).then(r => r.json()).then(data => {
                         if (data.code === 0) {
-                            // Update sequence numbers
+                            // Update sequence numbers in UI
                             tbody.querySelectorAll('tr[data-id]').forEach((tr, i) => {
                                 tr.querySelector('.seq-num').textContent = i + 1;
                             });
+                            showToast('✅ 排序已更新');
+                        } else {
+                            showToast('❌ 排序失败: ' + (data.msg || ''), true);
+                            console.error('Sort error:', data);
                         }
+                    }).catch(err => {
+                        showToast('❌ 网络错误', true);
+                        console.error('Sort fetch error:', err);
                     });
                 }
             });
