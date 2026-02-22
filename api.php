@@ -48,7 +48,7 @@ try {
             SELECT a.sort_order, a.ad_text, a.ad_link, a.image_url, a.image_file
             FROM ads a
             JOIN domains d ON a.domain_id = d.id
-            WHERE d.domain = ? AND a.sort_order = ?
+            WHERE d.domain = ? AND a.sort_order = ? AND a.is_active = 1
             LIMIT 1
         ");
         $stmt->execute([$domain, $seq]);
@@ -76,7 +76,7 @@ try {
             SELECT a.sort_order, a.ad_text, a.ad_link, a.image_url, a.image_file
             FROM ads a
             JOIN domains d ON a.domain_id = d.id
-            WHERE d.domain = ?
+            WHERE d.domain = ? AND a.is_active = 1
             ORDER BY a.sort_order ASC
         ");
         $stmt->execute([$domain]);

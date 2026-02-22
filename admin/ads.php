@@ -93,17 +93,18 @@ $ads = $stmt->fetchAll();
                             <th>联盟账号</th>
                             <th>广告文字</th>
                             <th>广告图片</th>
+                            <th>状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody id="adList">
                         <?php if (empty($ads)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted">暂无广告</td>
+                                <td colspan="7" class="text-center text-muted">暂无广告</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($ads as $ad): ?>
-                                <tr data-id="<?= $ad['id'] ?>">
+                                <tr data-id="<?= $ad['id'] ?>" class="<?= $ad['is_active'] ? '' : 'row-inactive' ?>">
                                     <td>
                                         <span class="sort-handle" title="拖拽排序">⠿</span>
                                         <span class="seq-num">
@@ -128,7 +129,20 @@ $ads = $stmt->fetchAll();
                                             <span class="text-muted">无图片</span>
                                         <?php endif; ?>
                                     </td>
+                                    <td>
+                                        <?php if ($ad['is_active']): ?>
+                                            <span class="badge badge-active">启用</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-inactive">停用</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="action-cell">
+                                        <button type="button"
+                                            class="btn btn-sm <?= $ad['is_active'] ? 'btn-warning' : 'btn-success-sm' ?>"
+                                            onclick="toggleAd(<?= $ad['id'] ?>, this)"
+                                            title="<?= $ad['is_active'] ? '停用广告' : '启用广告' ?>">
+                                            <?= $ad['is_active'] ? '⏸ 停用' : '▶ 启用' ?>
+                                        </button>
                                         <a href="ad_edit.php?id=<?= $ad['id'] ?>&domain_id=<?= $domainId ?>"
                                             class="btn btn-sm btn-info">编辑</a>
                                         <a href="ad_delete.php?id=<?= $ad['id'] ?>&domain_id=<?= $domainId ?>"
@@ -151,6 +165,44 @@ $ads = $stmt->fetchAll();
             Object.assign(t.style, { position: 'fixed', top: '20px', right: '20px', zIndex: '9999', minWidth: '200px' });
             document.body.appendChild(t);
             setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 2000);
+        }
+
+        // Toggle ad active status
+        function toggleAd(adId, btn) {
+            btn.disabled = true;
+            fetch('ad_toggle.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: adId, domain_id: <?= $domainId ?> })
+            }).then(r => r.json()).then(data => {
+                if (data.code === 0) {
+                    const tr = btn.closest('tr');
+                    const badge = tr.querySelector('.badge');
+                    if (data.is_active) {
+                        tr.classList.remove('row-inactive');
+                        badge.className = 'badge badge-active';
+                        badge.textContent = '启用';
+                        btn.className = 'btn btn-sm btn-warning';
+                        btn.innerHTML = '⏸ 停用';
+                        btn.title = '停用广告';
+                    } else {
+                        tr.classList.add('row-inactive');
+                        badge.className = 'badge badge-inactive';
+                        badge.textContent = '停用';
+                        btn.className = 'btn btn-sm btn-success-sm';
+                        btn.innerHTML = '▶ 启用';
+                        btn.title = '启用广告';
+                    }
+                    showToast(data.is_active ? '✅ 广告已启用' : '⏸ 广告已停用');
+                } else {
+                    showToast('❌ 操作失败: ' + (data.msg || ''), true);
+                }
+            }).catch(err => {
+                showToast('❌ 网络错误', true);
+                console.error('Toggle error:', err);
+            }).finally(() => {
+                btn.disabled = false;
+            });
         }
 
         // Drag to reorder

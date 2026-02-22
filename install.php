@@ -41,6 +41,7 @@ try {
         `ad_text` TEXT,
         `image_url` VARCHAR(1024) NOT NULL DEFAULT '',
         `image_file` VARCHAR(512) NOT NULL DEFAULT '',
+        `is_active` TINYINT UNSIGNED NOT NULL DEFAULT 1,
         `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY `uk_domain_sort` (`domain_id`, `sort_order`),
