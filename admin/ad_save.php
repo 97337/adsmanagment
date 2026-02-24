@@ -30,15 +30,20 @@ $data = [
 ];
 
 try {
+    $sortOrder = intval($_POST['sort_order'] ?? 0);
+    if ($sortOrder < 1)
+        $sortOrder = 1;
+
     if ($adId > 0) {
-        // Update existing ad
+        // Update existing ad (including sort_order)
         $stmt = $db->prepare("
             UPDATE ads SET
-                alliance_name = ?, alliance_account = ?, ad_link = ?,
+                sort_order = ?, alliance_name = ?, alliance_account = ?, ad_link = ?,
                 ad_text = ?, image_url = ?, image_file = ?
             WHERE id = ? AND domain_id = ?
         ");
         $stmt->execute([
+            $sortOrder,
             $data['alliance_name'],
             $data['alliance_account'],
             $data['ad_link'],
@@ -49,18 +54,14 @@ try {
             $domainId
         ]);
     } else {
-        // Add new ad - get next sort_order
-        $stmt = $db->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM ads WHERE domain_id = ?");
-        $stmt->execute([$domainId]);
-        $nextOrder = $stmt->fetch()['next_order'];
-
+        // Add new ad with user-specified sort_order
         $stmt = $db->prepare("
             INSERT INTO ads (domain_id, sort_order, alliance_name, alliance_account, ad_link, ad_text, image_url, image_file)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $domainId,
-            $nextOrder,
+            $sortOrder,
             $data['alliance_name'],
             $data['alliance_account'],
             $data['ad_link'],

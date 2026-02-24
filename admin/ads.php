@@ -76,7 +76,7 @@ $ads = $stmt->fetchAll();
             <?php if ($msg === 'saved'): ?>
                 <div class="alert alert-success">广告保存成功</div>
             <?php elseif ($msg === 'deleted'): ?>
-                <div class="alert alert-success">广告已删除，序号已重排</div>
+                <div class="alert alert-success">广告已删除</div>
             <?php endif; ?>
 
             <!-- API Quick Reference -->
@@ -146,7 +146,7 @@ $ads = $stmt->fetchAll();
                                         <a href="ad_edit.php?id=<?= $ad['id'] ?>&domain_id=<?= $domainId ?>"
                                             class="btn btn-sm btn-info">编辑</a>
                                         <a href="ad_delete.php?id=<?= $ad['id'] ?>&domain_id=<?= $domainId ?>"
-                                            class="btn btn-sm btn-danger" onclick="return confirm('确定删除该广告？序号将自动重排。')">删除</a>
+                                            class="btn btn-sm btn-danger" onclick="return confirm('确定删除该广告？')">删除</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

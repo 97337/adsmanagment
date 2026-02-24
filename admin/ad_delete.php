@@ -33,16 +33,6 @@ try {
     $stmt = $db->prepare("DELETE FROM ads WHERE id = ? AND domain_id = ?");
     $stmt->execute([$adId, $domainId]);
 
-    // Renumber remaining ads to keep 1-N continuous
-    $stmt = $db->prepare("SELECT id FROM ads WHERE domain_id = ? ORDER BY sort_order ASC");
-    $stmt->execute([$domainId]);
-    $remaining = $stmt->fetchAll();
-
-    $updateStmt = $db->prepare("UPDATE ads SET sort_order = ? WHERE id = ?");
-    foreach ($remaining as $i => $row) {
-        $updateStmt->execute([$i + 1, $row['id']]);
-    }
-
     $db->commit();
 } catch (Exception $e) {
     $db->rollBack();

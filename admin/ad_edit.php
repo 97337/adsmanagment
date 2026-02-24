@@ -29,6 +29,14 @@ if ($adId > 0) {
 
 $isEdit = $ad !== null;
 $title = $isEdit ? '编辑广告 #' . $ad['sort_order'] : '添加广告';
+
+// Get next sort_order for new ads
+$defaultSortOrder = 1;
+if (!$isEdit) {
+    $stmt = $db->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM ads WHERE domain_id = ?");
+    $stmt->execute([$domainId]);
+    $defaultSortOrder = $stmt->fetch()['next_order'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -83,6 +91,13 @@ $title = $isEdit ? '编辑广告 #' . $ad['sort_order'] : '添加广告';
                     <input type="hidden" name="ad_id" value="<?= $adId ?>">
                     <input type="hidden" name="image_file" id="imageFileInput"
                         value="<?= htmlspecialchars($ad['image_file'] ?? '') ?>">
+
+                    <div class="form-group" style="max-width:200px">
+                        <label for="sort_order">广告序号</label>
+                        <input type="number" id="sort_order" name="sort_order" min="1"
+                            value="<?= $isEdit ? $ad['sort_order'] : $defaultSortOrder ?>" required>
+                        <small class="text-muted">可自定义序号，如只需4号广告位则填4</small>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
